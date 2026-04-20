@@ -23,7 +23,10 @@ def parse_repo(url: str) -> tuple[str, str] | None:
     url = url.strip().rstrip(
         "/"
     )  # Strip whitespace and any trailing slashes from URL to sanitize
-    pattern = r"(?:https?://github\.com/)?([^/\s]+)/([^/\s]+)"  # Outline regex pattern to be matched
+
+    # Outline regex pattern to be matched
+    pattern = r"(?:https?://github\.com/)?([^/\s]+)/([^/\s]+)"
+
     m = re.fullmatch(
         pattern, url
     )  # Check to see if URL matches outlined regex pattern for GH user and repo
