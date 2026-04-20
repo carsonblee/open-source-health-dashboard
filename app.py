@@ -15,7 +15,7 @@ HEADERS = {"Accept": "application/vnd.github+json"}
 DAYS_RECENT_THRESHOLD = 183
 
 
-#%%%%%%%%%%%%%%% A: PARSE GH REPO AND OWNER FROM USER INPUT %%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%% A: PARSE GH REPO AND OWNER FROM USER INPUT %%%%%%%%%%%%%%%
 def parse_repo(url: str) -> tuple[str, str] | None:
     """Extract GH owner/repo from a GitHub URL or 'owner/repo' string"""
 
@@ -33,7 +33,7 @@ def parse_repo(url: str) -> tuple[str, str] | None:
     )  # Returns [GH user, repo] as long as everything goes according to plan
 
 
-#%%%%%%%%%%%%%%% B: FETCH REPO DATA FROM GITHUB API %%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%% B: FETCH REPO DATA FROM GITHUB API %%%%%%%%%%%%%%%
 def gh_get(path: str) -> tuple[dict | list | None, int]:
     """Make a GET request to the GitHub API to fetch data, return (data, status_code)"""
 
@@ -49,7 +49,7 @@ def gh_get(path: str) -> tuple[dict | list | None, int]:
     )  # Unsuccessful request = return None and status code for error handling
 
 
-#%%%%%%%%%%%%%%% C: CHECK REPO FILES/CONTENTS %%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%% C: CHECK REPO FILES/CONTENTS %%%%%%%%%%%%%%%
 def check_file_exists(owner: str, repo: str, path: str) -> bool:
     """Checks repo contents to see if a file exists"""
 
@@ -59,7 +59,7 @@ def check_file_exists(owner: str, repo: str, path: str) -> bool:
     return status == 200
 
 
-#%%%%%%%%%%%%%%% D: CHECK RECENT REPO COMMITS %%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%% D: CHECK RECENT REPO COMMITS %%%%%%%%%%%%%%%
 def check_recent_commit(owner: str, repo: str) -> tuple[bool, str | None]:
     """Checks if repo has had a recent commit (last 6 months). Returns [is_recent: bool, last_commit_date: str]"""
 
@@ -92,7 +92,7 @@ def check_recent_commit(owner: str, repo: str) -> tuple[bool, str | None]:
         return False, None
 
 
-#%%%%%%%%%%%%%%% E: CHECK GITHUB ACTIONS %%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%% E: CHECK GITHUB ACTIONS %%%%%%%%%%%%%%%
 def check_github_actions(owner: str, repo: str) -> bool:
     """Checks if repo has any GitHub Actions workflows defined in .github/workflows/"""
 
@@ -104,7 +104,7 @@ def check_github_actions(owner: str, repo: str) -> bool:
     )  # Return True (aka yes, GH actions defined) if request successful AND data is a non-empty list (indicating presence of GH Actions workflows)
 
 
-#%%%%%%%%%%%%%%% F: ANALYZE REPO FOR HEALTH SCORE %%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%% F: ANALYZE REPO FOR HEALTH SCORE %%%%%%%%%%%%%%%
 def analyze_repo(url: str) -> dict:
     """Main function to analyze a GH repo based on health checklist and return results"""
 
@@ -199,16 +199,16 @@ def analyze_repo(url: str) -> dict:
     }
 
 
-#%%%%%%%%%%%%%%% W1: DEFINES BASIC/DEFAULT WEB APP ROUTE %%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%% W1: DEFINES BASIC/DEFAULT WEB APP ROUTE %%%%%%%%%%%%%%%
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
-#%%%%%%%%%%%%%%% W2: DEFINES WEB APP FUNCTIONALITY TO ANALYZE REPO AND DISPLAY %%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%% W2: DEFINES WEB APP FUNCTIONALITY TO ANALYZE REPO AND DISPLAY %%%%%%%%%%%%%%%
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    """Called by frontend to analyze a repo based on user input URL, diplays JSON of results or error"""
+    """Called by frontend to analyze a repo based on user input URL, displays JSON of results or error"""
 
     body = (
         request.get_json(silent=True) or {}
@@ -232,6 +232,6 @@ def analyze():
     return jsonify(result)  # Otherwise, return regular results to frontend
 
 
-#%%%%%%%%%%%%%%% W3: RUNS THE WEB APP %%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%% W3: RUNS THE WEB APP %%%%%%%%%%%%%%%
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
