@@ -5,12 +5,6 @@ Testing functionality of app.py
 
 Run with:  pytest tests/ -v
 """
-import sys
-from pathlib import Path
-
-# Add parent directory to path so we can import app.py
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 import pytest
 from app import app, parse_repo
 
@@ -18,7 +12,7 @@ from app import app, parse_repo
 # # %%%%%%%%%%%%%%% 2: FUNCTIONALITY TESTING %%%%%%%%%%%%%%%
 def test_parse_repo_full_url():
     assert parse_repo("https://github.com/EbookFoundation/free-programming-books") == (
-        "Free Ebook Foundation",
+        "EbookFoundation",
         "free-programming-books",
     )
 
