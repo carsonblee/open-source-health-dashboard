@@ -97,7 +97,7 @@ def check_recent_commit(owner: str, repo: str) -> tuple[bool, str | None]:
     except (
         KeyError,
         ValueError,
-    ):  # If any expected data missing or date parsing fails,
+    ):  # If any expected data missing/date parsing fails
         # return error and say not recent commit
         return False, None
 
