@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Open Source Health Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #273B09;
+      --surface: #111118;
+      --border: #1e1e2e;
+      --accent: #7B904B;
+      --accent-dim: rgba(0,255,136,0.12);
+      --warn: #ffb830;
+      --fail: #ff4d6d;
+      --text: #DBD2E0;
+      --muted: #7B904B;
+      --radius: 6px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    /* Grid bg */
+    /* body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    } */
+
+    .container { position: relative; z-index: 1; width: 100%; max-width: 720px; }
+
+    header { text-align: center; margin-bottom: 3rem; }
+
+    .tag {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 3px 10px;
+      border-radius: 2px;
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .subtitle {
+      margin-top: 0.8rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 400;
+    }
+
+    /* Input card */
+    .input-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.7rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: var(--muted); }
+
+    button#analyze-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.7rem 1.4rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    button#analyze-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    button#analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .error-msg {
+      margin-top: 1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--fail);
+      display: none;
+    }
+
+    /* Results */
+    #results { display: none; }
+
+    .repo-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .repo-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+    .repo-name a { color: var(--accent); text-decoration: none; }
+    .repo-name a:hover { text-decoration: underline; }
+    .repo-desc { margin-top: 0.3rem; color: var(--muted); font-size: 0.85rem; font-weight: 400; }
+
+    .repo-meta {
+      display: flex;
+      gap: 1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .repo-meta span { display: flex; align-items: center; gap: 4px; }
+
+    /* Score */
+    .score-bar-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .score-circle {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .score-circle.warn { border-color: var(--warn); color: var(--warn); }
+    .score-circle.fail { border-color: var(--fail); color: var(--fail); }
+
+    .score-right { flex: 1; min-width: 160px; }
+    .score-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; font-family: 'Space Mono', monospace; }
+    .bar-track {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--accent);
+      width: 0;
+      transition: width 0.8s cubic-bezier(.4,0,.2,1);
+    }
+    .bar-fill.warn { background: var(--warn); }
+    .bar-fill.fail { background: var(--fail); }
+
+    /* Checklist */
+    .checklist {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .check-item:last-child { border-bottom: none; }
+    .check-item:hover { background: rgba(255,255,255,0.02); }
+
+    .check-icon {
+      font-size: 1rem;
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .check-text { flex: 1; font-size: 0.9rem; font-weight: 600; }
+    .check-detail {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    .check-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .pass  { color: var(--accent); background: var(--accent-dim); }
+    .miss  { color: var(--fail);   background: rgba(255,77,109,0.1); }
+
+    /* Spinner */
+    .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Fade in */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeUp 0.4s ease forwards; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="tag">Open Source Health Dashboard</div>
+    <h1>GitHub Repo <span>Health</span><br>Analyzer</h1>
+    <p class="subtitle">Check open-source best practices for any public GitHub repository.</p>
+  </header>
+
+  <div class="input-card">
+    <div class="input-row">
+      <input type="text" id="repo-url" placeholder="https://github.com/owner/repo  or  owner/repo" />
+      <button id="analyze-btn" onclick="analyze()">
+        <span id="btn-text">Analyze</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </div>
+    <div class="error-msg" id="error-msg"></div>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<script>
+  document.getElementById('repo-url').addEventListener('keydown', e => {
+    if (e.key === 'Enter') analyze();
+  });
+
+  async function analyze() {
+    const url = document.getElementById('repo-url').value.trim();
+    if (!url) return;
+
+    const btn = document.getElementById('analyze-btn');
+    const btnText = document.getElementById('btn-text');
+    const spinner = document.getElementById('spinner');
+    const errorMsg = document.getElementById('error-msg');
+    const results = document.getElementById('results');
+
+    btn.disabled = true;
+    btnText.style.display = 'none';
+    spinner.style.display = 'block';
+    errorMsg.style.display = 'none';
+    results.style.display = 'none';
+
+    try {
+      const res = await fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        errorMsg.textContent = data.error || 'An unexpected error occurred.';
+        errorMsg.style.display = 'block';
+      } else {
+        renderResults(data);
+      }
+    } catch (err) {
+      errorMsg.textContent = 'Network error. Is the server running?';
+      errorMsg.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btnText.style.display = 'inline';
+      spinner.style.display = 'none';
+    }
+  }
+
+  function renderResults(d) {
+    const pct = d.score / d.total;
+    const scoreClass = pct === 1 ? '' : pct >= 0.6 ? 'warn' : 'fail';
+
+    const checksHtml = d.checks.map(c => {
+      const badge = c.passed
+        ? '<span class="check-badge pass">PASS</span>'
+        : '<span class="check-badge miss">MISSING</span>';
+      const icon = c.passed ? '✓' : '✗';
+      let detail = '';
+      if (c.passed && c.detail) {
+        const formatted = c.id === 'recent'
+          ? 'Last commit: ' + new Date(c.detail).toLocaleDateString()
+          : c.detail;
+        detail = `<div class="check-detail">${formatted}</div>`;
+      }
+      return `
+        <div class="check-item">
+          <div class="check-icon" style="color:${c.passed ? 'var(--accent)' : 'var(--fail)'}">${icon}</div>
+          <div class="check-text">${c.label}${detail}</div>
+          ${badge}
+        </div>`;
+    }).join('');
+
+    const html = `
+      <div class="fade-in">
+        <div class="repo-header">
+          <div>
+            <div class="repo-name"><a href="${d.html_url}" target="_blank">${d.full_name}</a></div>
+            ${d.description ? `<div class="repo-desc">${d.description}</div>` : ''}
+          </div>
+          <div class="repo-meta">
+            <span>★ ${d.stars.toLocaleString()}</span>
+            <span>⑂ ${d.forks.toLocaleString()}</span>
+          </div>
+        </div>
+
+        <div class="score-bar-wrap">
+          <div class="score-circle ${scoreClass}">${d.score}/${d.total}</div>
+          <div class="score-right">
+            <div class="score-label">Health Score — ${Math.round(pct*100)}%</div>
+            <div class="bar-track">
+              <div class="bar-fill ${scoreClass}" id="bar-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="checklist">${checksHtml}</div>
+      </div>`;
+
+    const results = document.getElementById('results');
+    results.innerHTML = html;
+    results.style.display = 'block';
+
+    // Animate bar
+    requestAnimationFrame(() => {
+      document.getElementById('bar-fill').style.width = (pct * 100) + '%';
+    });
+  }
+</script>
+</body>
+</html>
