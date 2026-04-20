@@ -1,10 +1,12 @@
 # Open Source Health Dashboard
+
 A simple web app that analyzes a public GiTHub repo and provides a "health report" on its open-source best practices.
 
 > [!NOTE]
 > *This project repo was built to meet the goals, requirements, and deliverables of the JVN Communications, Inc. technical assessment.*
 
 ## Open Source Health Checklist
+
 - :white_check_mark: Has a `LICENSE` file
 - :white_check_mark: Has a `README.md` file
 - :white_check_mark: Has a `.gitignore` file
