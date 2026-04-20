@@ -9,7 +9,7 @@ import pytest
 from app import app, parse_repo
 
 
-# Placeholder Functionality Testing
+# # %%%%%%%%%%%%%%% 2: FUNCTIONALITY TESTING %%%%%%%%%%%%%%%
 def test_parse_repo_full_url():
     assert parse_repo("https://github.com/EbookFoundation/free-programming-books") == (
         "Free Ebook Foundation",
@@ -17,7 +17,7 @@ def test_parse_repo_full_url():
     )
 
 
-# Placeholder Integration Testing
+# %%%%%%%%%%%%%%% 2: INTEGRATION TESTING %%%%%%%%%%%%%%%
 @pytest.fixture
 def client():
     app.config["TESTING"] = True
