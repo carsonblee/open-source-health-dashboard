@@ -19,7 +19,13 @@ def test_parse_repo_full_url():
 
 # %%%%%%%%%%%%%%% 2: INTEGRATION TESTING %%%%%%%%%%%%%%%
 @pytest.fixture
-def client():
+def client():  # Adds client object to test with
     app.config["TESTING"] = True
     with app.test_client() as c:
         yield c
+
+
+def test_index_returns_200(client):
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert b"Analyzer" in resp.data
