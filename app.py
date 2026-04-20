@@ -1,4 +1,3 @@
-import os
 import re
 from datetime import datetime, timezone, timedelta
 
@@ -17,7 +16,9 @@ DAYS_RECENT_THRESHOLD = 183
 
 # %%%%%%%%%%%%%%% A: PARSE GH REPO AND OWNER FROM USER INPUT %%%%%%%%%%%%%%%
 def parse_repo(url: str) -> tuple[str, str] | None:
-    """Extract GH owner/repo from a GitHub URL or 'owner/repo' string"""
+    """
+    Extract GH owner/repo from a GitHub URL or 'owner/repo' string
+    """
 
     url = url.strip().rstrip(
         "/"
@@ -35,7 +36,10 @@ def parse_repo(url: str) -> tuple[str, str] | None:
 
 # %%%%%%%%%%%%%%% B: FETCH REPO DATA FROM GITHUB API %%%%%%%%%%%%%%%
 def gh_get(path: str) -> tuple[dict | list | None, int]:
-    """Make a GET request to the GitHub API to fetch data, return (data, status_code)"""
+    """
+    Make a GET request to the GitHub API to fetch data,
+    returns (data, status_code)
+    """
 
     r = requests.get(
         f"{GITHUB_API}{path}", headers=HEADERS, timeout=10
@@ -51,7 +55,9 @@ def gh_get(path: str) -> tuple[dict | list | None, int]:
 
 # %%%%%%%%%%%%%%% C: CHECK REPO FILES/CONTENTS %%%%%%%%%%%%%%%
 def check_file_exists(owner: str, repo: str, path: str) -> bool:
-    """Checks repo contents to see if a file exists"""
+    """
+    Checks repo contents to see if a file exists
+    """
 
     _, status = gh_get(
         f"/repos/{owner}/{repo}/contents/{path}"
@@ -61,7 +67,10 @@ def check_file_exists(owner: str, repo: str, path: str) -> bool:
 
 # %%%%%%%%%%%%%%% D: CHECK RECENT REPO COMMITS %%%%%%%%%%%%%%%
 def check_recent_commit(owner: str, repo: str) -> tuple[bool, str | None]:
-    """Checks if repo has had a recent commit (last 6 months). Returns [is_recent: bool, last_commit_date: str]"""
+    """
+    Checks if repo has had a recent commit (last 6 months).
+    Returns [is_recent: bool, last_commit_date: str]
+    """
 
     data, status = gh_get(
         f"/repos/{owner}/{repo}/commits?per_page=1"
@@ -94,19 +103,23 @@ def check_recent_commit(owner: str, repo: str) -> tuple[bool, str | None]:
 
 # %%%%%%%%%%%%%%% E: CHECK GITHUB ACTIONS %%%%%%%%%%%%%%%
 def check_github_actions(owner: str, repo: str) -> bool:
-    """Checks if repo has any GitHub Actions workflows defined in .github/workflows/"""
+    """
+    Checks if repo has any GitHub Actions workflows defined in .github/workflows/
+    """
 
     data, status = gh_get(
         f"/repos/{owner}/{repo}/contents/.github/workflows"
     )  # Calls B: gh_get, to check for contents of .github/workflows to see if any GH Actions
     return (
         status == 200 and isinstance(data, list) and len(data) > 0
-    )  # Return True (aka yes, GH actions defined) if request successful AND data is a non-empty list (indicating presence of GH Actions workflows)
+    )  # Return True if request successful AND data is a non-empty list
 
 
 # %%%%%%%%%%%%%%% F: ANALYZE REPO FOR HEALTH SCORE %%%%%%%%%%%%%%%
 def analyze_repo(url: str) -> dict:
-    """Main function to analyze a GH repo based on health checklist and return results"""
+    """
+    Main function to analyze a GH repo based on health checklist and return results
+    """
 
     parsed = parse_repo(
         url
@@ -123,9 +136,7 @@ def analyze_repo(url: str) -> dict:
     if status == 404:  # Not allowed access, either private or doesn't exist
         return {"error": f"Repository '{owner}/{repo}' not found or is private."}
     if status == 403:  # Most likely hit rate limit
-        return {
-            "error": "GitHub API rate limit exceeded. Set a GITHUB_TOKEN env var to increase limits."
-        }
+        return {"error": "GitHub API rate limit exceeded."}
     if status != 200 or not repo_data:  # Catch-all for any other errors
         return {"error": f"GitHub API error (status {status}). Please try again later."}
 
@@ -208,7 +219,10 @@ def index():
 # %%%%%%%%%%%%%%% W2: DEFINES WEB APP FUNCTIONALITY TO ANALYZE REPO AND DISPLAY %%%%%%%%%%%%%%%
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    """Called by frontend to analyze a repo based on user input URL, displays JSON of results or error"""
+    """
+    Called by frontend to analyze a repo based on user input URL,
+    displays JSON of results or error
+    """
 
     body = (
         request.get_json(silent=True) or {}
