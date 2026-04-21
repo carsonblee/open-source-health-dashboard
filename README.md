@@ -1,5 +1,7 @@
 # Open Source Health Dashboard
 
+[![CI](https://github.com/carsonblee/open-source-health-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/carsonblee/open-source-health-dashboard/actions/workflows/ci.yml)
+
 A simple web app that analyzes a public GiTHub repo and provides a "health report" on its open-source best practices.
 
 > [!NOTE]

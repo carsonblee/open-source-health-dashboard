@@ -20,9 +20,8 @@ def parse_repo(url: str) -> tuple[str, str] | None:
     Extract GH owner/repo from a GitHub URL or 'owner/repo' string
     """
 
-    url = url.strip().rstrip(
-        "/"
-    )  # Strip whitespace and any trailing slashes from URL to sanitize
+    # Strip whitespace and any trailing slashes from URL to sanitize
+    url = url.strip().rstrip("/")
 
     # Outline regex pattern to be matched
     pattern = r"(?:https?://github\.com/)?([^/\s]+)/([^/\s]+)"
